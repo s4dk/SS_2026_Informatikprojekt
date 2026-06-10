@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "name": "VRSplineActions",
+    "maps": [
+        {
+            "name": "SplineDrawing",
+            "id": "25f48a95-328c-457d-987f-5dc8d5f941fa",
+            "actions": [
+                {
+                    "name": "Draw",
+                    "type": "Button",
+                    "id": "65fb924a-cfb4-4ca6-b7b9-57a2e4068c53",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Clear",
+                    "type": "Button",
+                    "id": "e47e9a55-cc2f-437f-add3-6da687d8a399",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "88ed27c4-2446-4f85-b5a3-c7cc7ba42f2d",
+                    "path": "<XRController>{RightHand}/triggerPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Draw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "249d3568-d7c5-497d-a2c4-e3632b079db4",
+                    "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Clear",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
