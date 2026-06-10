@@ -8,7 +8,7 @@ namespace NPC.Navigation
     
 public class Area : MonoBehaviour
 {
-    public float Raduis = 20f;
+    public float Raduis = 10f;
 
     private void OnDrawGizmosSelected()
         {
@@ -25,6 +25,7 @@ public class Area : MonoBehaviour
 
             NavMeshHit hit;
             Vector3 finalPosition = transform.position;
+            
             if(NavMesh.SamplePosition(randomPoint, out hit, 2f, 1))
             {
                 finalPosition = hit.position;
