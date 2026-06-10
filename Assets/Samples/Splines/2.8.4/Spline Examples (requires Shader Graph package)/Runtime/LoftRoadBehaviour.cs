@@ -19,7 +19,8 @@ namespace Unity.Splines.Examples
     {
         [SerializeField]
         List<SplineData<float>> m_Widths = new List<SplineData<float>>();
-
+       
+        
         public List<SplineData<float>> Widths
         {
             get
@@ -27,7 +28,7 @@ namespace Unity.Splines.Examples
                 foreach (var width in m_Widths)
                 {
                     if (width.DefaultValue == 0)
-                        width.DefaultValue = 1f;
+                        width.DefaultValue = 0.05f;
                 }
 
                 return m_Widths;
@@ -50,13 +51,13 @@ namespace Unity.Splines.Examples
         }
 
         [SerializeField]
-        int m_SegmentsPerMeter = 1;
+        int m_SegmentsPerMeter = 50;
 
         [SerializeField]
         Mesh m_Mesh;
 
         [SerializeField]
-        float m_TextureScale = 1f;
+        float m_TextureScale = 5f;
 
         public IReadOnlyList<Spline> splines => LoftSplines;
 
@@ -168,7 +169,7 @@ namespace Unity.Splines.Examples
 #if  UNITY_EDITOR
                     Undo.RecordObject(this, "Modifying Widths SplineData");
 #endif
-                    m_Widths.Add(new SplineData<float>() { DefaultValue = 1f });
+                    m_Widths.Add(new SplineData<float>() { DefaultValue = 0f });
                 }
             }
 
@@ -306,7 +307,7 @@ namespace Unity.Splines.Examples
                 var scale = transform.lossyScale;
                 var tangent = math.normalizesafe(math.cross(up, dir)) * new float3(1f / scale.x, 1f / scale.y, 1f / scale.z);
 
-                var w = 1f;
+                var w = 0.05f;
                 if (widthDataIndex < m_Widths.Count)
                 {
                     w = m_Widths[widthDataIndex].DefaultValue;

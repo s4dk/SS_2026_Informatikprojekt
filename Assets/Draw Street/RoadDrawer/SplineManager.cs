@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
+using Vector3 = UnityEngine.Vector3;
 using Unity.Mathematics;
+using System.Numerics;
 
 public class SplineManager : MonoBehaviour
 {
@@ -27,7 +29,8 @@ public class SplineManager : MonoBehaviour
 
     /// <summary>Adds a world-space point to the given spline.</summary>
     public void AddPoint(SplineContainer container, Vector3 worldPos)
-    {
+    {   
+        worldPos.y += 0.005f;
         float3 local = container.transform.InverseTransformPoint(worldPos);
         container.Spline.Add(new BezierKnot(local), TangentMode.AutoSmooth);
     }
