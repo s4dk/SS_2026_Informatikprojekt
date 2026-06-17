@@ -1,15 +1,21 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Splines;
 
 namespace NPC.Navigation
 {
     
 public class Area : MonoBehaviour
 {
+    [SerializeField]
+    private SplineContainer spline;
+    [SerializeField]
+    private float radius = 3f;
+    
     public float Raduis = 20f;
-
     private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.blue;
@@ -18,19 +24,9 @@ public class Area : MonoBehaviour
 
     public Vector3 GetRandomPoint()
         {
-            Vector3 randomDirection = Random.insideUnitSphere * Raduis;
-            randomDirection.y = 0f;
+            float t = UnityEngine.Random.Range(0f, 1f);
 
-            Vector3 randomPoint = transform.position + randomDirection;
-
-            NavMeshHit hit;
-            Vector3 finalPosition = transform.position;
-            
-            if(NavMesh.SamplePosition(randomPoint, out hit, 2.0f, 1))
-            {
-                finalPosition = hit.position;
-            }
-            return finalPosition;
+            return spline.EvaluatePosition(t);
         }    
 }
 }
