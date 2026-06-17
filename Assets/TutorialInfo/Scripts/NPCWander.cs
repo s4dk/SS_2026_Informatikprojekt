@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using NUnit.Framework.Constraints;
 using Cinemachine;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort;
+using UnityEngine.Splines;
 
 namespace NPC.Navigation
 {
@@ -15,6 +16,8 @@ public class NPCWander : NPCComponent
 {
    
     public Area Area;
+    public Spline spline;
+    public SplineContainer splineContainer;
 
     //finite state machine for wandering behaviour
     enum State
@@ -32,6 +35,11 @@ public class NPCWander : NPCComponent
     [SerializeField]
     private float waitTime = 0f;
 
+    [SerializeField] private int waypointCount = 20;
+
+    private List<Vector3> waypoints = new();
+    private int currentWaypoint = 0;
+
     [Header("Debugging")]
     [SerializeField]
     State state = State.Wandering;
@@ -45,6 +53,20 @@ public class NPCWander : NPCComponent
             else ChangeState(State.Waiting);
 
         }
+
+    void GenerateWaypoints()
+    {
+    waypoints.Clear();
+
+        for (int i = 0; i < waypointCount; i++)
+        {
+            float t = i / (float)(waypointCount - 1);
+
+            Vector3 point = splineContainer.EvaluatePosition(t);
+
+            waypoints.Add(point);
+        }
+    }
 
     private void Update()
         {
@@ -89,6 +111,13 @@ public class NPCWander : NPCComponent
    void SetRandomDestination()
         {
             npc.Agent.SetDestination(Area.GetRandomPoint());
+
+             npc.Agent.SetDestination(waypoints[currentWaypoint]);
+
+            currentWaypoint++;
+
+            if(currentWaypoint >= waypoints.Count)
+                currentWaypoint = 0; // loop
         }
 
 }
