@@ -30,15 +30,16 @@ public class NPCWander : NPCComponent
     float maxWaitTime = 3f;
     [SerializeField]
     float maxWaitTimeRandom = 5f;
-    float currentMaxWaitTime = 3f;
+   
+    [Space(15)]
+    float maxWanderTime = 5f;
 
     [SerializeField]
     private float waitTime = 0f;
 
-    [SerializeField] private int waypointCount = 20;
+    [SerializeField]
+    private float wanderTime = 0f;
 
-    private List<Vector3> waypoints = new();
-    private int currentWaypoint = 0;
 
     [Header("Debugging")]
     [SerializeField]
@@ -50,23 +51,11 @@ public class NPCWander : NPCComponent
             {
                 ChangeState(State.Wandering);
             } 
-            else ChangeState(State.Waiting);
+            else {
+                ChangeState(State.Waiting);
+            }
 
         }
-
-    void GenerateWaypoints()
-    {
-    waypoints.Clear();
-
-        for (int i = 0; i < waypointCount; i++)
-        {
-            float t = i / (float)(waypointCount - 1);
-
-            Vector3 point = splineContainer.EvaluatePosition(t);
-
-            waypoints.Add(point);
-        }
-    }
 
     private void Update()
         {
@@ -81,7 +70,12 @@ public class NPCWander : NPCComponent
             }
             else if (state == State.Wandering)
             {
-             if(hasArrived()) ChangeState(State.Waiting);   
+             //wanderTime -= Time.deltaTime;
+             
+             if(hasArrived() || wanderTime < 0f)
+                {
+                    
+                } ChangeState(State.Waiting);   
             }
         }
 
@@ -94,6 +88,8 @@ public class NPCWander : NPCComponent
                 npc.Agent.isStopped = false;
 
                 SetRandomDestination();
+
+                wanderTime = maxWanderTime;
             } 
             else if (state == State.Waiting)
             {
@@ -111,13 +107,6 @@ public class NPCWander : NPCComponent
    void SetRandomDestination()
         {
             npc.Agent.SetDestination(Area.GetRandomPoint());
-
-             npc.Agent.SetDestination(waypoints[currentWaypoint]);
-
-            currentWaypoint++;
-
-            if(currentWaypoint >= waypoints.Count)
-                currentWaypoint = 0; // loop
         }
 
 }
