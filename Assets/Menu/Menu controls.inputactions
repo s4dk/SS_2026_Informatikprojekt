@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "name": "Menu controls",
+    "maps": [
+        {
+            "name": "Menu",
+            "id": "c67d0ba6-7f67-4566-a568-eeba24d39177",
+            "actions": [
+                {
+                    "name": "Hold",
+                    "type": "Button",
+                    "id": "19fb177f-2944-4262-999b-ea930bfcaf45",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MenuInteraction",
+                    "type": "Button",
+                    "id": "acb71416-efe8-410e-ac3d-4087a3c90bec",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fd9be9fa-d261-4e0c-821c-de18df0ebc7d",
+                    "path": "<XRController>{LeftHand}/triggerPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3f9b9d84-f46c-4aed-815c-115f9fae2ec2",
+                    "path": "<XRController>{LeftHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MenuInteraction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
