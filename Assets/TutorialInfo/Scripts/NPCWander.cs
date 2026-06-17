@@ -25,6 +25,9 @@ public class NPCWander : NPCComponent
     }
     [SerializeField]
     float maxWaitTime = 3f;
+    [SerializeField]
+    float maxWaitTimeRandom = 5f;
+    float currentMaxWaitTime = 3f;
 
     [SerializeField]
     private float waitTime = 0f;
@@ -72,7 +75,7 @@ public class NPCWander : NPCComponent
             } 
             else if (state == State.Waiting)
             {
-                waitTime =maxWaitTime;
+                waitTime = maxWaitTime + Random.Range(0f, maxWaitTimeRandom);
 
                 npc.Agent.isStopped = true;
             }
