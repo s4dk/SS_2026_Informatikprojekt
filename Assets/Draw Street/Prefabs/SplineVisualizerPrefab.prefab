@@ -161,7 +161,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SplineVisualizer
   resolution: 80
   lineWidth: 0.08
-  lineMaterial: {fileID: 0}
+  lineMaterial: {fileID: 2100000, guid: 302ecb83b4f464dfba8418de7af4c128, type: 2}
 --- !u!114 &-108844470379099034
 MonoBehaviour:
   m_ObjectHideFlags: 0
