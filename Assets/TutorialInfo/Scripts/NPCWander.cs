@@ -78,7 +78,19 @@ public class NPCWander : NPCComponent
 
     private void Update()
         {
-        
+            float speed = 5f;
+            float t = 0f;
+            GetComponent<NavMeshAgent>().enabled = false;
+        /*
+            t += speed*Time.deltaTime;
+
+            if(t > 1f)
+            {
+                t -= 1f;
+            }
+            */
+            transform.position = splineContainer.EvaluatePosition(t);
+
             if(state == State.Waiting)
             {
                 waitTime -= Time.deltaTime;
