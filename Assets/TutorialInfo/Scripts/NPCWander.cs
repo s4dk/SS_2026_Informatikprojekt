@@ -36,6 +36,10 @@ public class NPCWander : NPCComponent
     private float waitTime = 0f;
 
     [SerializeField] private int waypointCount = 20;
+    [SerializeField]
+    private float speed = 0.1f;
+
+    private float t = 0f;
 
     private List<Vector3> waypoints = new();
     private int currentWaypoint = 0;
@@ -47,9 +51,10 @@ public class NPCWander : NPCComponent
     public void Start()
         {
             
-            GenerateWaypoints();
+            npc.Agent.enabled = false;
+            //GenerateWaypoints();
 
-            currentWaypoint = Random.Range(0, waypoints.Count);
+            //currentWaypoint = Random.Range(0, waypoints.Count);
             
             if(Random.Range(0f, 100.0f) > 50f)
             {
@@ -78,19 +83,7 @@ public class NPCWander : NPCComponent
 
     private void Update()
         {
-            float speed = 5f;
-            float t = 0f;
-            GetComponent<NavMeshAgent>().enabled = false;
-        /*
-            t += speed*Time.deltaTime;
-
-            if(t > 1f)
-            {
-                t -= 1f;
-            }
-            */
-            transform.position = splineContainer.EvaluatePosition(t);
-
+        
             if(state == State.Waiting)
             {
                 waitTime -= Time.deltaTime;
@@ -101,7 +94,13 @@ public class NPCWander : NPCComponent
             }
             else if (state == State.Wandering)
             {
-             if(hasArrived()) ChangeState(State.Waiting);   
+             if(hasArrived()) ChangeState(State.Waiting);
+             t += speed * Time.deltaTime;
+             if(t > 1f)
+                {
+                    t -= 1;
+                }   
+                transform.position = splineContainer.EvaluatePosition(t);
             }
         }
 
@@ -112,7 +111,7 @@ public class NPCWander : NPCComponent
            if(state == State.Wandering)
             {
                 npc.Agent.isStopped = false;
-                SetNextWaypoint();
+                //SetNextWaypoint();
                 //SetRandomDestination();
             } 
             else if (state == State.Waiting)
