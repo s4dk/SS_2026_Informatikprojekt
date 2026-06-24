@@ -46,12 +46,17 @@ public class NPCWander : NPCComponent
 
     public void Start()
         {
+            
+            GenerateWaypoints();
+
+            currentWaypoint = Random.Range(0, waypoints.Count);
+            
             if(Random.Range(0f, 100.0f) > 50f)
             {
                 ChangeState(State.Wandering);
             } 
             else ChangeState(State.Waiting);
-
+            
         }
 
     void GenerateWaypoints()
@@ -64,7 +69,10 @@ public class NPCWander : NPCComponent
 
             Vector3 point = splineContainer.EvaluatePosition(t);
 
-            waypoints.Add(point);
+                if (NavMesh.SamplePosition(point, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+                {
+                    waypoints.Add(hit.position);
+                }
         }
     }
 
@@ -92,14 +100,13 @@ public class NPCWander : NPCComponent
            if(state == State.Wandering)
             {
                 npc.Agent.isStopped = false;
-
-                SetRandomDestination();
+                SetNextWaypoint();
+                //SetRandomDestination();
             } 
             else if (state == State.Waiting)
             {
-                waitTime = maxWaitTime + Random.Range(0f, maxWaitTimeRandom);
-
                 npc.Agent.isStopped = true;
+                waitTime = maxWaitTime + Random.Range(0f, maxWaitTimeRandom);
             }
         }
 
@@ -120,5 +127,17 @@ public class NPCWander : NPCComponent
                 currentWaypoint = 0; // loop
         }
 
+    void SetNextWaypoint()
+    {
+    if (waypoints.Count == 0)
+        return;
+
+    npc.Agent.SetDestination(waypoints[currentWaypoint]);
+
+    currentWaypoint++;
+
+    if (currentWaypoint >= waypoints.Count)
+        currentWaypoint = 0;
+    }   
 }
 }
