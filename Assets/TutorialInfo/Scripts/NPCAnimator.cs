@@ -19,7 +19,7 @@ public class NPCAnimator : NPCComponent
     // Update is called once per frame
     void Update()
     {
-        npc. Animator.SetFloat("Speed", npc.CurrentSpeed);
+        npc. Animator.SetFloat("Speed", 1f);
     }
 }
 }

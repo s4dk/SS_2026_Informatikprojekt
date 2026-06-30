@@ -17,6 +17,9 @@ public class NPC : MonoBehaviour
     [HideInInspector]
     public Animator Animator;
 
+    private Vector3 lastPosition;
+    private float currentSpeed;
+
     public float CurrentSpeed
         {
             get{return Agent.velocity.magnitude;}
@@ -26,7 +29,15 @@ public class NPC : MonoBehaviour
         {
             Agent = GetComponent<NavMeshAgent>();
             Animator = GetComponent<Animator>();
+            lastPosition = transform.position; 
         }
+
+    private void Update()
+    {
+    currentSpeed = (transform.position - lastPosition).magnitude / Time.deltaTime;
+
+    lastPosition = transform.position;
+    }
 
 }
 }

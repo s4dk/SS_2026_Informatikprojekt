@@ -100,7 +100,16 @@ public class NPCWander : NPCComponent
                 {
                     t -= 1;
                 }   
-                transform.position = splineContainer.EvaluatePosition(t);
+                
+                Vector3 position = splineContainer.EvaluatePosition(t);
+                Vector3 forward = splineContainer.EvaluateTangent(t);
+
+                transform.position = position;
+
+                if(forward.sqrMagnitude > 0.001f)
+                {
+                    transform.rotation = Quaternion.LookRotation(forward);
+                }
             }
         }
 
