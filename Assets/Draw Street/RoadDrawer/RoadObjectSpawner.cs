@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Splines;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 public class RoadObjectSpawner : MonoBehaviour
 {
@@ -11,11 +12,19 @@ public class RoadObjectSpawner : MonoBehaviour
     [SerializeField] private bool spawnLeft = true;
     [SerializeField] private bool spawnRight = true;
 
-    [Header("Overlap Prevention")]
-    [SerializeField] private LayerMask obstacleLayer; // layer(s) your spawned prefabs live on
-    [SerializeField] private float overlapPadding = 0.2f; // small buffer so objects aren't touching edge-to-edge
+[Header("Overlap Prevention")]
+[SerializeField] private LayerMask obstacleLayer;
+[SerializeField] private LayerMask roadLayer; // road mesh colliders live here
+[SerializeField] private float overlapPadding = 0.2f;
+
+[Header("Spline Collision Clearing")]
+[SerializeField] private float roadWidth = 1f; // horizontal clearing radius, no buffer
+[SerializeField] private bool ignoreHeightDifference = true; // road width is a horizontal concept
 
     private SplineContainer _splineContainer;
+
+    // shared across ALL RoadObjectSpawner instances, so any new road can clear objects from any other road
+    private static readonly List<GameObject> _allSpawnedObjects = new List<GameObject>();
 
     public void SetSpline(SplineContainer container)
     {
@@ -29,6 +38,9 @@ public class RoadObjectSpawner : MonoBehaviour
             Debug.LogWarning("RoadObjectSpawner: No spline assigned.");
             return;
         }
+
+        // clear anything (from this road or any other) sitting on the path before placing new objects
+        ClearObjectsOnSpline(_splineContainer, roadWidth, ignoreHeightDifference);
 
         Spline spline = _splineContainer.Spline;
         float length = spline.GetLength();
@@ -50,32 +62,77 @@ public class RoadObjectSpawner : MonoBehaviour
         }
     }
 
-    private void TrySpawnAt(Vector3 position, Vector3 facing)
+    /// <summary>
+    /// Destroys any tracked spawned object that lies within roadWidth of the given spline's path.
+    /// Works across ALL RoadObjectSpawner instances, not just this one.
+    /// </summary>
+public static void ClearObjectsOnSpline(SplineContainer container, float roadWidth, bool ignoreHeight = true)
+{
+    if (container == null) return;
+    Spline spline = container.Spline;
+
+    for (int j = _allSpawnedObjects.Count - 1; j >= 0; j--)
     {
-        if (Physics.Raycast(position + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 50f, groundLayer))
+        GameObject obj = _allSpawnedObjects[j];
+        if (obj == null)
         {
-            position = hit.point;
+            _allSpawnedObjects.RemoveAt(j); // clean up destroyed refs
+            continue;
         }
 
-        GameObject prefab = objectsToSpawn[UnityEngine.Random.Range(1, objectsToSpawn.Length)];
-        Quaternion rotation = Quaternion.LookRotation(facing);
+        // convert object's world position into the spline's local space
+        float3 localPos = container.transform.InverseTransformPoint(obj.transform.position);
 
-        if (IsOverlapping(prefab, position, rotation))
-            return; // something's already there, skip this point
+        // exact nearest point on the curve — not a sampled approximation
+        SplineUtility.GetNearestPoint(spline, localPos, out float3 nearest, out float t);
+        Vector3 nearestWorld = container.transform.TransformPoint((Vector3)nearest);
 
-        SpawnAt(prefab, position, rotation);
+        float dist;
+        if (ignoreHeight)
+        {
+            // flatten both points to XZ so hills/slopes don't skew the distance
+            Vector3 a = new Vector3(obj.transform.position.x, 0f, obj.transform.position.z);
+            Vector3 b = new Vector3(nearestWorld.x, 0f, nearestWorld.z);
+            dist = Vector3.Distance(a, b);
+        }
+        else
+        {
+            dist = Vector3.Distance(obj.transform.position, nearestWorld);
+        }
+
+        if (dist <= roadWidth)
+        {
+            _allSpawnedObjects.RemoveAt(j);
+            Destroy(obj);
+        }
     }
-
-    private bool IsOverlapping(GameObject prefab, Vector3 position, Quaternion rotation)
+}
+private void TrySpawnAt(Vector3 position, Vector3 facing)
+{
+    if (Physics.Raycast(position + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 50f, groundLayer))
     {
-        Bounds bounds = GetPrefabBounds(prefab);
-        Vector3 halfExtents = bounds.extents + Vector3.one * overlapPadding;
-
-        // OverlapBox checks the actual footprint of the object, oriented to its spawn rotation
-        Collider[] hits = Physics.OverlapBox(position + bounds.center, halfExtents, rotation, obstacleLayer);
-        return hits.Length > 0;
+        position = hit.point;
     }
 
+    GameObject prefab = objectsToSpawn[UnityEngine.Random.Range(1, objectsToSpawn.Length)];
+    Quaternion rotation = Quaternion.LookRotation(facing);
+
+    if (IsOverlapping(prefab, position, rotation, obstacleLayer))
+        return; // blocked by another spawned object
+
+    if (IsOverlapping(prefab, position, rotation, roadLayer))
+        return; // blocked by a road mesh
+
+    SpawnAt(prefab, position, rotation);
+}
+
+private bool IsOverlapping(GameObject prefab, Vector3 position, Quaternion rotation, LayerMask layer)
+{
+    Bounds bounds = GetPrefabBounds(prefab);
+    Vector3 halfExtents = bounds.extents + Vector3.one * overlapPadding;
+    Collider[] hits = Physics.OverlapBox(position + bounds.center, halfExtents, rotation, layer);
+    return hits.Length > 0;
+}
     private Bounds GetPrefabBounds(GameObject prefab)
     {
         Renderer r = prefab.GetComponentInChildren<Renderer>();
@@ -84,13 +141,16 @@ public class RoadObjectSpawner : MonoBehaviour
         Collider c = prefab.GetComponentInChildren<Collider>();
         if (c != null) return c.bounds;
 
-        return new Bounds(Vector3.zero, Vector3.one * 0.5f); // fallback
+        return new Bounds(Vector3.zero, Vector3.one * 0.5f);
     }
 
     private void SpawnAt(GameObject prefab, Vector3 position, Quaternion rotation)
     {
         GameObject spawner = objectsToSpawn[0];
-        Instantiate(prefab, position, rotation);
-        Instantiate(spawner, position, rotation);
+        GameObject spawnedPrefab = Instantiate(prefab, position, rotation);
+        GameObject spawnedSpawner = Instantiate(spawner, position, rotation);
+
+        _allSpawnedObjects.Add(spawnedPrefab);
+        _allSpawnedObjects.Add(spawnedSpawner);
     }
 }
