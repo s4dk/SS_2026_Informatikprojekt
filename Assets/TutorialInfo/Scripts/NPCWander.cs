@@ -1,11 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using NUnit.Framework.Constraints;
-using Cinemachine;
-using UnityEngine.XR.Interaction.Toolkit.Locomotion.Comfort;
 using UnityEngine.Splines;
 
 namespace NPC.Navigation
@@ -30,8 +25,7 @@ public class NPCWander : NPCComponent
     float maxWaitTime = 3f;
     [SerializeField]
     float maxWaitTimeRandom = 5f;
-    float currentMaxWaitTime = 3f;
-
+    
     [SerializeField]
     private float waitTime = 0f;
 
