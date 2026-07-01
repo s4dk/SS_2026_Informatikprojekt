@@ -13,7 +13,7 @@ public class NPCGenerator : MonoBehaviour
     Area Area;
 
     [SerializeField]
-    int count = 3;
+    int count = 1;
 
         private void Start()
         {
