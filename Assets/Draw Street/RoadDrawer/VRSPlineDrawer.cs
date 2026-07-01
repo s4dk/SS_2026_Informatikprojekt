@@ -82,6 +82,11 @@ private void OnDrawEnd(InputAction.CallbackContext _)
 {
     _isDrawing = false;
 
+    if (_activeContainer != null)
+    {
+        AddRoadCollider(_activeContainer.gameObject);
+    }
+
     if (spawner != null && _activeContainer != null)
     {
         spawner.SetSpline(_activeContainer);
@@ -92,6 +97,35 @@ private void OnDrawEnd(InputAction.CallbackContext _)
 
     _activeContainer = null;
     _activeRoad = null;
+}
+
+private void AddRoadCollider(GameObject roadObject)
+{
+    MeshFilter meshFilter = roadObject.GetComponent<MeshFilter>();
+    if (meshFilter == null || meshFilter.sharedMesh == null)
+    {
+        Debug.LogWarning("VRSplineDrawer: No mesh found on road object to build a collider from.");
+        return;
+    }
+
+    // remove any stale collider first (in case this road is redrawn/rebuilt)
+    MeshCollider existing = roadObject.GetComponent<MeshCollider>();
+    if (existing != null)
+        Destroy(existing);
+
+    MeshCollider roadCollider = roadObject.AddComponent<MeshCollider>();
+    roadCollider.sharedMesh = meshFilter.sharedMesh;
+    roadCollider.convex = false; // keep non-convex for accurate shape on curves
+
+    int roadLayerIndex = LayerMask.NameToLayer("Road");
+    if (roadLayerIndex == -1)
+    {
+        Debug.LogWarning("VRSplineDrawer: 'Road' layer not found. Create it in Project Settings → Tags and Layers.");
+    }
+    else
+    {
+        roadObject.layer = roadLayerIndex;
+    }
 }
 
     // ── ray helpers ──────────────────────────────────────────────────────────
