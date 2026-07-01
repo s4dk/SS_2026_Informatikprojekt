@@ -1,7 +1,7 @@
 using UnityEngine;
-using UnityEngine.AI;
 using System.Collections.Generic;
 using UnityEngine.Splines;
+using Unity.Mathematics;
 
 namespace NPC.Navigation
 {
@@ -13,6 +13,8 @@ public class NPCWander : NPCComponent
     public Area Area;
     public Spline spline;
     public SplineContainer splineContainer;
+
+    public SplineContainer pendingSplineContainer;
 
     //finite state machine for wandering behaviour
     enum State
@@ -32,7 +34,7 @@ public class NPCWander : NPCComponent
     [SerializeField] private int waypointCount = 20;
     [SerializeField]
     private float speed = 0.1f;
-
+    [SerializeField] private float detectionRadius = 5f;
     private float t = 0f;
 
     private List<Vector3> waypoints = new();
@@ -50,7 +52,7 @@ public class NPCWander : NPCComponent
 
             //currentWaypoint = Random.Range(0, waypoints.Count);
             
-            if(Random.Range(0f, 100.0f) > 50f)
+            if(UnityEngine.Random.Range(0f, 100.0f) > 50f)
             {
                 ChangeState(State.Wandering);
             } 
@@ -58,26 +60,58 @@ public class NPCWander : NPCComponent
             
         }
 
-    void GenerateWaypoints()
+
+    private void OnEnable()
     {
-    waypoints.Clear();
+        SplineRegistry.OnSplineCreated += HandleNewSpline;
+    }
 
-        for (int i = 0; i < waypointCount; i++)
+    private void OnDisable()
+    {
+        SplineRegistry.OnSplineCreated -= HandleNewSpline;
+    }
+
+    private void HandleNewSpline(SplineContainer newSpline)
+    {
+    float3 nearest;
+    float newT;
+    float dist = SplineUtility.GetNearestPoint(
+        newSpline.Spline,
+        (float3)transform.position,
+        out nearest,
+        out newT
+    );
+
+    // nur reagieren, wenn der neue Spline nah genug am NPC ist
+        if (dist <= detectionRadius)
         {
-            float t = i / (float)(waypointCount - 1);
-
-            Vector3 point = splineContainer.EvaluatePosition(t);
-
-                if (NavMesh.SamplePosition(point, out NavMeshHit hit, 5f, NavMesh.AllAreas))
-                {
-                    waypoints.Add(hit.position);
-                }
+            pendingSplineContainer = newSpline;
         }
+    }
+
+    private void CheckForSplineSwitch()
+    {
+        if (pendingSplineContainer == null) return;
+
+        float3 nearest;
+        float newT;
+        SplineUtility.GetNearestPoint(
+            pendingSplineContainer.Spline,
+            (float3)transform.position,
+            out nearest,
+            out newT
+        );
+
+        splineContainer = pendingSplineContainer;
+        t = newT;
+        pendingSplineContainer = null;
     }
 
     private void Update()
         {
         
+            CheckForSplineSwitch();
+
             if(state == State.Waiting)
             {
                 waitTime -= Time.deltaTime;
@@ -120,7 +154,7 @@ public class NPCWander : NPCComponent
             else if (state == State.Waiting)
             {
                 npc.Agent.isStopped = true;
-                waitTime = maxWaitTime + Random.Range(0f, maxWaitTimeRandom);
+                waitTime = maxWaitTime + UnityEngine.Random.Range(0f, maxWaitTimeRandom);
             }
         }
 
