@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Splines;
 using Unity.Mathematics;
+//using System.Numerics;
 
 public class RoadObjectSpawner : MonoBehaviour
 {
@@ -41,21 +42,23 @@ public class RoadObjectSpawner : MonoBehaviour
             Vector3 right = Vector3.Cross(forward, (Vector3)upVector).normalized;
 
             if (spawnRight)
-                SpawnAt(worldPos + right * sideOffset, forward);
+                SpawnAt(worldPos + right * sideOffset, -right);
 
             if (spawnLeft)
-                SpawnAt(worldPos - right * sideOffset, forward);
+                SpawnAt(worldPos - right * sideOffset, right);
         }
     }
 
-    private void SpawnAt(Vector3 position, Vector3 forward)
+    private void SpawnAt(Vector3 position, Vector3 facing)
     {
         if (Physics.Raycast(position + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 50f, groundLayer))
         {
             position = hit.point;
         }
 
-        GameObject prefab = objectsToSpawn[UnityEngine.Random.Range(0, objectsToSpawn.Length)];
-        Instantiate(prefab, position, Quaternion.LookRotation(forward));
+        GameObject spawner = objectsToSpawn[0];
+        GameObject prefab = objectsToSpawn[UnityEngine.Random.Range(1, objectsToSpawn.Length)];
+        Instantiate(prefab, position, Quaternion.LookRotation(facing));
+        Instantiate(spawner, position, Quaternion.LookRotation(facing));
     }
 }
