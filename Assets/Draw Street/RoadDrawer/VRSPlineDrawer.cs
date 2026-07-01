@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Splines;
 using Unity.Splines.Examples;
+using Unity.Mathematics;
 
 public class VRSplineDrawer : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class VRSplineDrawer : MonoBehaviour
         drawAction.action.started    += OnDrawStart;
         drawAction.action.canceled   += OnDrawEnd;
         clearAction.action.performed += _ => SplineManager.Instance.ClearAll();
+        SplineRegistry.OnSplineCreated += HandleNewSpline;
     }
 
     private void OnDisable()
@@ -41,6 +43,7 @@ public class VRSplineDrawer : MonoBehaviour
         drawAction.action.canceled   -= OnDrawEnd;
         drawAction.action.Disable();
         clearAction.action.Disable();
+        SplineRegistry.OnSplineCreated -= HandleNewSpline;
     }
 
 private SplineContainer _activeContainer;
@@ -85,6 +88,8 @@ private void OnDrawEnd(InputAction.CallbackContext _)
         spawner.SpawnObjects();
     }
 
+    SplineRegistry.Instance.RegisterSpline(_activeContainer);
+
     _activeContainer = null;
     _activeRoad = null;
 }
@@ -125,4 +130,19 @@ private void OnDrawEnd(InputAction.CallbackContext _)
         }
         return false;
     }
+
+    private void HandleNewSpline(SplineContainer newSpline)
+    {
+        float3 nearest;
+        float newT;
+        float dist = SplineUtility.GetNearestPoint(
+            newSpline.Spline,
+            (float3)transform.position,
+            out nearest,
+            out newT
+        );
+
+    }
+
+
 }
