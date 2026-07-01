@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5350408385559666990}
   - component: {fileID: 7900597279443047908}
   - component: {fileID: 8030501637849447712}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TinyBuilding1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,7 +109,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
